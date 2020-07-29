@@ -36,15 +36,90 @@ namespace sdds {
 	void Menu::indent() const {
 		// output 4 spaces in a loop (from 0 to m_indentation)
 		for (int i = 0; i < m_indentation; i++) {
-			cout << " ";
+			cout << "    ";
 		}
 	}
 
 	void Menu::clear() {
 		// deallocate all the menu items in a loop.
+		// deallocate m_title
+		// after delete or delete[] it is recommended to put nullptr in the pointer
+		// set up zero number of items
 		for (int i = 0; i < m_noOfItems; i++) {
-			delete[] m_items[i];
+			delete m_items[i];
 		}
+		delete[] m_title;
+		m_title = nullptr;
+		m_items[0];
 	}
 
+
+	// Constructors, Copy Constructor, Assignments(2), Destructor
+
+	Menu::Menu(const char* title, int indentation) :
+		m_title(nullptr),
+		m_items{ nullptr },
+		m_noOfItems(0),
+		m_indentation(indentation) {
+		*this = title;
+	}
+
+	Menu::Menu(const Menu& M) :
+		m_title(nullptr),
+		m_items{ nullptr },
+		m_noOfItems(0),
+		m_indentation(M.m_indentation) {
+		*this = M; 
+	}
+
+	Menu& Menu::operator=(const char* title) {
+		// check the title parameter
+		// if it is not nullptr
+		// delete the old title
+		// allocate a new memory 
+		// do strcpy()
+		// otherwise title is nullptr
+
+		return *this;
+	}
+
+	Menu& Menu::operator=(const Menu& M) {
+		// check if 2 objects are the same, if they are, nothing to do
+		if (this != &M) {
+			// call clear() on the current object
+			this->clear();
+
+			// if M is not empty
+			if (M.isEmpty() == false) {
+				//	a - replace the menu title (you can reuse the assignment oprator)
+				*this = M.m_title;
+				//	b - add to the current menu all the menu items from M in a loop
+				for (int i = 0; i < M.m_noOfItems; i++) {
+					add(M.m_items[i]->m_value);
+				}
+				// copy indentation from M to the current object
+				this->m_indentation = M.m_indentation;
+			}
+		}
+		
+
+		
+
+		
+		return *this;
+	}
+
+	Menu::~Menu() {
+		clear();
+	}
+
+	// Add function and insertion function
+
+	void Menu::add(const char* item) {
+		// check if your menu is not empty and number of items is leess than MAX_NO_OF_ITEMS
+		// if any of that then nothing to do
+		
+		// check item parameter
+
+	}
 }
