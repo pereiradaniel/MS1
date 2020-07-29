@@ -75,11 +75,19 @@ namespace sdds {
 	Menu& Menu::operator=(const char* title) {
 		// check the title parameter
 		// if it is not nullptr
-		// delete the old title
-		// allocate a new memory 
-		// do strcpy()
-		// otherwise title is nullptr
-
+		if (title != nullptr) {
+			// delete the old title
+			delete[] this->m_title;
+			// allocate a new memory
+			int length = strlen(title);
+			this->m_title = new char[length + 1];
+			// do strcpy()
+			strcpy(this->m_title, title);
+		}
+		else {
+			// otherwise title is nullptr
+			this->m_title = nullptr;
+		}
 		return *this;
 	}
 
@@ -101,11 +109,6 @@ namespace sdds {
 				this->m_indentation = M.m_indentation;
 			}
 		}
-		
-
-		
-
-		
 		return *this;
 	}
 
