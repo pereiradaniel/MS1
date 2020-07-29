@@ -4,10 +4,7 @@
 #include "Utils.h"
 using namespace std;
 namespace sdds {
-	
-
 	// MenuItem Class
-	/////////////////
 
 	MenuItem::MenuItem(const char* value) : m_value(nullptr) {
 		// if the value is not nullptr, then allocate memory and do strcpy()
@@ -31,7 +28,6 @@ namespace sdds {
 
 
 	// Private Methods
-	//////////////////
 
 	void Menu::indent() const {
 		// output 4 spaces in a loop (from 0 to m_indentation)
@@ -121,8 +117,81 @@ namespace sdds {
 	void Menu::add(const char* item) {
 		// check if your menu is not empty and number of items is leess than MAX_NO_OF_ITEMS
 		// if any of that then nothing to do
-		
-		// check item parameter
+		if (!isEmpty && m_noOfItems < MAX_NO_OF_ITEMS) {
+			// check item parameter
+			if (item != nullptr) {
+				// if it is not nullptr
+				// create a new menu item and add it to array of items
+				MenuItem newItem(item);
+				this->add(item);
+				// increase the number of items
+				m_noOfItems += 1;
+			}
+			else {
+				// if the item parameter is nullptr, call clear() on the current menu
+				clear();
+			}			
+		}
 
 	}
+
+	Menu& Menu::operator<<(const char* item) {
+		add(item);
+		return *this;
+	}
+
+
+	// display menu function
+	void Menu::display() const {
+		// if the menu is empty, just print a message "Invalid Menu!" and end of line otherwise:
+		if (isEmpty()) {
+			cout << "Invalid Menu!" << endl;
+		}
+		else {
+			//	call indent() function
+			indent();
+			//	print the m_title and end of line
+			cout << m_title << endl;
+			//	if there is no items, print a message "No Items to display!" and end of line
+			if (m_items == nullptr) {
+				cout << "No Items to display!" << endl;
+			}
+			else {
+				//	if theere are items, in a loop call indent(), print menu item number, dash, space
+				//  call display() for each item
+				//		m_items[i]->display();
+				for (int i = 0; i < m_noOfItems; i++) {
+					indent();
+					cout << i + "- ";
+					m_items[i]->display();
+				}
+				
+				//	after the loop call indent() and print a prompt character and a space
+				indent();
+				cout << "> ";
+			}
+		}
+	}
+
+	// casting
+	Menu::operator int() const {
+		return run();
+	}
+
+	Menu::operator bool() const {
+		return !isEmpty();
+	}
+
+	bool Menu::isEmpty() const {
+		return (m_title == nullptr);
+	}
+
+	// run
+	int Menu::run() const {
+		int selection = 0;
+		display();
+		if (!isEmpty() && m_noOfItems > 0)
+			Utils::read(selection, 1, m_noOfItems, "Invalid selection, try again: ");
+	}
 }
+
