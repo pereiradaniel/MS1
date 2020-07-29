@@ -14,7 +14,7 @@ namespace sdds {
 		const int length = strlen(value);
 		char* newValue = new char[length + 1];
 		if (value != nullptr) {
-			strcpy(m_value, value);
+			strcpy(m_value, newValue);
 		}
 	}
 
@@ -24,6 +24,9 @@ namespace sdds {
 
 	void MenuItem::display() const {
 		// if the m_value is not nullptr, then output m_value and endl
+		if (m_value != nullptr) {
+			cout << m_value << endl;
+		}
 	}
 
 
@@ -31,7 +34,17 @@ namespace sdds {
 	//////////////////
 
 	void Menu::indent() const {
+		// output 4 spaces in a loop (from 0 to m_indentation)
+		for (int i = 0; i < m_indentation; i++) {
+			cout << " ";
+		}
+	}
 
+	void Menu::clear() {
+		// deallocate all the menu items in a loop.
+		for (int i = 0; i < m_noOfItems; i++) {
+			delete[] m_items[i];
+		}
 	}
 
 }
