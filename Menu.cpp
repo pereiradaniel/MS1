@@ -1,197 +1,184 @@
 #define _CRT_SECURE_NO_WARNINGS
+#include <iostream>
+#include <iomanip>
 #include <cstring>
 #include "Menu.h"
 #include "Utils.h"
+
 using namespace std;
 namespace sdds {
-	// MenuItem Class
 
-	MenuItem::MenuItem(const char* value) : m_value(nullptr) {
-		// if the value is not nullptr, then allocate memory and do strcpy()
-		const int length = strlen(value);
-		char* newValue = new char[length + 1];
-		if (value != nullptr) {
-			strcpy(m_value, newValue);
-		}
-	}
+    // MenuItem
 
-	MenuItem::~MenuItem() {
-		delete[] m_value;
-	}
+    MenuItem::MenuItem(const char* value) : m_value(nullptr) {
+        m_value = new char[strlen(value) + 1];
+        strcpy(m_value, value);
+    }
 
-	void MenuItem::display() const {
-		// if the m_value is not nullptr, then output m_value and endl
-		if (m_value != nullptr) {
-			cout << m_value << endl;
-		}
-	}
+    MenuItem::~MenuItem() {
+        delete[] m_value;
+        m_value = nullptr;
+    }
+
+    void MenuItem::display() const {
+        if (m_value != nullptr)
+            cout << m_value << endl;
+    }
 
 
-	// Private Methods
+    // Menu
 
-	void Menu::indent() const {
-		// output 4 spaces in a loop (from 0 to m_indentation)
-		for (int i = 0; i < m_indentation; i++) {
-			cout << "    ";
-		}
-	}
+    Menu::Menu() {
+        m_title = nullptr;
+        m_item[0] = nullptr;
+        m_noOfItems = 0;
+        m_indentation = 0;
+    }
 
-	void Menu::clear() {
-		// deallocate all the menu items in a loop.
-		// deallocate m_title
-		// after delete or delete[] it is recommended to put nullptr in the pointer
-		// set up zero number of items
-		for (int i = 0; i < m_noOfItems; i++) {
-			delete m_items[i];
-		}
-		delete[] m_title;
-		m_title = nullptr;
-		m_items[0];
-	}
+    Menu::Menu(const char* title, int indentation) :
+        m_title(nullptr),
+        m_item{ nullptr },
+        m_noOfItems(0),
+        m_indentation(indentation) {
+        *this = title;
+    }
 
+    Menu::~Menu() {
+        clear();
+    }
 
-	// Constructors, Copy Constructor, Assignments(2), Destructor
+    Menu::Menu(const Menu& M) :
+        m_title(nullptr),
+        m_item{ nullptr },
+        m_noOfItems(0),
+        m_indentation(M.m_indentation) {
+        *this = M;
+    }
 
-	Menu::Menu(const char* title, int indentation) :
-		m_title(nullptr),
-		m_items{ nullptr },
-		m_noOfItems(0),
-		m_indentation(indentation) {
-		*this = title;
-	}
+    Menu& Menu::operator=(const Menu& new_menu) {
+        // Check if this menu is same as new menu
+        if (this != &new_menu) {
+            clear();
+            // Add values to menu
+            m_noOfItems = new_menu.m_noOfItems;
+            m_indentation = new_menu.m_indentation;
+            
+            if (new_menu.m_title != nullptr) {
+                // Handle title
+                m_title = new char[strlen(new_menu.m_title) + 1];
+                strcpy(m_title, new_menu.m_title);
+                // Handle menu items
+                int counter = new_menu.m_noOfItems;
+                for (int i = 0; i < counter; i++) {
+                    m_item[i] = new MenuItem(new_menu.m_item[i]->m_value);
+                }
+            }
+            else {
+                clear();
+            }
+        }
+        return *this;
+    }
 
-	Menu::Menu(const Menu& M) :
-		m_title(nullptr),
-		m_items{ nullptr },
-		m_noOfItems(0),
-		m_indentation(M.m_indentation) {
-		*this = M; 
-	}
+    const Menu& Menu::operator=(const char* title) {
+        // check the title parameter
+        // if it is not nullptr
+        if (title != nullptr) {
+            // delete the old title
+            delete[] m_title;
+            // allocate a new memory
+            m_title = new char[strlen(title) + 1];
+            // do strcpy()
+            strcpy(m_title, title);
+        }
+        else {
+            m_title = nullptr;
+        }
+        return *this;
+    }
 
-	Menu& Menu::operator=(const char* title) {
-		// check the title parameter
-		// if it is not nullptr
-		if (title != nullptr) {
-			// delete the old title
-			delete[] this->m_title;
-			// allocate a new memory
-			int length = strlen(title);
-			this->m_title = new char[length + 1];
-			// do strcpy()
-			strcpy(this->m_title, title);
-		}
-		else {
-			// otherwise title is nullptr
-			this->m_title = nullptr;
-		}
-		return *this;
-	}
+    Menu::operator bool() const {
+        return m_indentation >= 0 && m_title != nullptr
+            && m_noOfItems > 0 && m_noOfItems <= MAX_NO_OF_ITEMS;
+    }
 
-	Menu& Menu::operator=(const Menu& M) {
-		// check if 2 objects are the same, if they are, nothing to do
-		if (this != &M) {
-			// call clear() on the current object
-			this->clear();
+    bool Menu::isEmpty() const {
+        return !(*this);
+    }
 
-			// if M is not empty
-			if (M.isEmpty() == false) {
-				//	a - replace the menu title (you can reuse the assignment oprator)
-				*this = M.m_title;
-				//	b - add to the current menu all the menu items from M in a loop
-				for (int i = 0; i < M.m_noOfItems; i++) {
-					add(M.m_items[i]->m_value);
-				}
-				// copy indentation from M to the current object
-				this->m_indentation = M.m_indentation;
-			}
-		}
-		return *this;
-	}
+    void Menu::display() const {
+        // if the menu is empty, just print a message "Invalid Menu!" and end of line otherwise:
+        if (m_title == nullptr) {
+            cout << "Invalid Menu!" << endl;
+        }
+        else {
+            //	call indent() function
+            indent();
+            //	print the m_title and end of line
+            cout << m_title << endl;
+            //	if there is no items, print a message "No Items to display!" and end of line
+            if (isEmpty()) {
+                cout << "No Items to display!" << endl;
+            }
+            else if (!isEmpty()) {
+                //	if there are items, in a loop call indent(), print menu item number, dash, space
+                //  call display() for each item
+                //		m_items[i]->display();
+                for (int i = 0; i < m_noOfItems; i++) {
+                    indent();
+                    cout << i + 1 << "- ";
+                    m_item[i]->display();
+                }
 
-	Menu::~Menu() {
-		clear();
-	}
+                //	after the loop call indent() and print a prompt character and a space
+                indent();
+                cout << "> ";
+            }
+        }
+    }
 
-	// Add function and insertion function
+    void Menu::indent() const {
+        // output 4 spaces in a loop (from 0 to m_indentation)
+        for (int i = 0; i < m_indentation; i++) {
+            cout << "    ";
+        }
+    }
 
-	void Menu::add(const char* item) {
-		// check if your menu is not empty and number of items is leess than MAX_NO_OF_ITEMS
-		// if any of that then nothing to do
-		if (!isEmpty && m_noOfItems < MAX_NO_OF_ITEMS) {
-			// check item parameter
-			if (item != nullptr) {
-				// if it is not nullptr
-				// create a new menu item and add it to array of items
-				MenuItem newItem(item);
-				this->add(item);
-				// increase the number of items
-				m_noOfItems += 1;
-			}
-			else {
-				// if the item parameter is nullptr, call clear() on the current menu
-				clear();
-			}			
-		}
+    void Menu::add(const char* newItem) {
+        if (newItem != nullptr) {
+            m_item[m_noOfItems] = new MenuItem(newItem);
+            m_noOfItems++;
+        }
+        else {
+            clear();
+        }
+    }
 
-	}
+    Menu& Menu::operator<<(const char* newContent) {
+        add(newContent);
+        return *this;
+    }
 
-	Menu& Menu::operator<<(const char* item) {
-		add(item);
-		return *this;
-	}
+    int Menu::run() const {
+        int selection = 0;
+        display();
+        if (!isEmpty() && m_noOfItems > 0)
+            Utils::read(selection, 1, m_noOfItems, "Invalid selection, try again: ");
+        return selection;
+    }
 
+    Menu::operator int() const {
+        return run();
+    }
 
-	// display menu function
-	void Menu::display() const {
-		// if the menu is empty, just print a message "Invalid Menu!" and end of line otherwise:
-		if (isEmpty()) {
-			cout << "Invalid Menu!" << endl;
-		}
-		else {
-			//	call indent() function
-			indent();
-			//	print the m_title and end of line
-			cout << m_title << endl;
-			//	if there is no items, print a message "No Items to display!" and end of line
-			if (m_items == nullptr) {
-				cout << "No Items to display!" << endl;
-			}
-			else {
-				//	if theere are items, in a loop call indent(), print menu item number, dash, space
-				//  call display() for each item
-				//		m_items[i]->display();
-				for (int i = 0; i < m_noOfItems; i++) {
-					indent();
-					cout << i + "- ";
-					m_items[i]->display();
-				}
-				
-				//	after the loop call indent() and print a prompt character and a space
-				indent();
-				cout << "> ";
-			}
-		}
-	}
-
-	// casting
-	Menu::operator int() const {
-		return run();
-	}
-
-	Menu::operator bool() const {
-		return !isEmpty();
-	}
-
-	bool Menu::isEmpty() const {
-		return (m_title == nullptr);
-	}
-
-	// run
-	int Menu::run() const {
-		int selection = 0;
-		display();
-		if (!isEmpty() && m_noOfItems > 0)
-			Utils::read(selection, 1, m_noOfItems, "Invalid selection, try again: ");
-	}
+    void Menu::clear() {
+        delete[] m_title;
+        for (int i = 0; i < m_noOfItems; ++i) {
+            delete m_item[i];
+            m_item[i] = nullptr;
+        }
+        m_title = nullptr;
+        m_indentation = 0;
+        m_noOfItems = 0;
+    }
 }
-
